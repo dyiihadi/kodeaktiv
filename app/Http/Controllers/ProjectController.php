@@ -44,12 +44,12 @@ class ProjectController extends Controller
     {
         $project->load('members', 'owner');
 
-        // Kelompokkan tugas berdasarkan status
-        $tasks = $project->tasks()->get()->groupBy('status');
+        // Eager load tasks beserta relasi comments dan author dari comment
+        $tasks = $project->tasks()->with('comments.author')->get()->groupBy('status');
 
         return view('projects.show', [
             'project' => $project,
-            'tasks' => $tasks
+            'tasks' => $tasks,
         ]);
     }
 }

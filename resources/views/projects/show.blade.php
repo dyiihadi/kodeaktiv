@@ -51,7 +51,11 @@
                         </div>
                     @endif
 
-                    <div class="mt-8">
+                    <div class="mt-8" x-data="{
+                        isModalOpen: false,
+                        selectedTask: null,
+                        tasks: {{ json_encode($tasks->flatten()) }}
+                    }" x-init="$watch('tasks', value => console.log(value))">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-3" id="kanban-board"
                             data-project-id="{{ $project->id }}">
 
@@ -59,10 +63,12 @@
                                 <h3 class="mb-4 text-lg font-bold">To Do (Tugas Baru)</h3>
                                 <div class="space-y-4 kanban-column" data-status="To Do">
                                     @foreach ($tasks['To Do'] ?? [] as $task)
-                                        <div class="p-4 bg-white border rounded-lg shadow"
+                                        <button
+                                            @click="isModalOpen = true; selectedTask = tasks.find(task => task.id === {{ $task->id }})"
+                                            class="w-full p-4 text-left bg-white border rounded-lg shadow hover:bg-gray-50"
                                             data-task-id="{{ $task->id }}">
                                             <p>{{ $task->title }}</p>
-                                        </div>
+                                        </button>
                                     @endforeach
                                 </div>
                                 <div class="mt-4">
@@ -78,10 +84,12 @@
                                 <h3 class="mb-4 text-lg font-bold">In Progress (Dikerjakan)</h3>
                                 <div class="space-y-4 kanban-column" data-status="In Progress">
                                     @foreach ($tasks['In Progress'] ?? [] as $task)
-                                        <div class="p-4 bg-white border rounded-lg shadow"
+                                        <button
+                                            @click="isModalOpen = true; selectedTask = tasks.find(task => task.id === {{ $task->id }})"
+                                            class="w-full p-4 text-left bg-white border rounded-lg shadow hover:bg-gray-50"
                                             data-task-id="{{ $task->id }}">
                                             <p>{{ $task->title }}</p>
-                                        </div>
+                                        </button>
                                     @endforeach
                                 </div>
                             </div>
@@ -90,11 +98,58 @@
                                 <h3 class="mb-4 text-lg font-bold">Done (Selesai)</h3>
                                 <div class="space-y-4 kanban-column" data-status="Done">
                                     @foreach ($tasks['Done'] ?? [] as $task)
-                                        <div class="p-4 bg-white border rounded-lg shadow"
+                                        <button
+                                            @click="isModalOpen = true; selectedTask = tasks.find(task => task.id === {{ $task->id }})"
+                                            class="w-full p-4 text-left bg-white border rounded-lg shadow hover:bg-gray-50"
                                             data-task-id="{{ $task->id }}">
-                                            <p class="text-gray-500 line-through">{{ $task->title }}</p>
-                                        </div>
+                                            <p>{{ $task->title }}</p>
+                                        </button>
                                     @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        <div x-show="isModalOpen" class="fixed inset-0 z-40 bg-black bg-opacity-50"
+                            @click="isModalOpen = false"></div>
+
+                        <div x-show="isModalOpen" x-transition
+                            class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                            <div @click.outside="isModalOpen = false"
+                                class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                                <div class="p-4 border-b">
+                                    <h2 class="text-xl font-bold" x-text="selectedTask ? selectedTask.title : ''"></h2>
+                                </div>
+                                <div class="p-6 overflow-y-auto">
+                                    <form method="POST"
+                                        :action="selectedTask ? '/tasks/' + selectedTask.id + '/comments' : ''">
+                                        @csrf
+                                        <textarea name="body" class="w-full border-gray-300 rounded-md shadow-sm" rows="3"
+                                            placeholder="Tulis komentar..." required></textarea>
+                                        <x-primary-button class="mt-2">Kirim</x-primary-button>
+                                    </form>
+                                    <div class="mt-6 space-y-4">
+                                        <template x-if="selectedTask && selectedTask.comments.length > 0">
+                                            <template x-for="comment in selectedTask.comments" :key="comment.id">
+                                                <div class="flex items-start space-x-3">
+                                                    <div class="flex-shrink-0">
+                                                        <div class="flex items-center justify-center w-10 h-10 font-bold text-gray-600 bg-gray-200 rounded-full"
+                                                            x-text="comment.author.name.charAt(0)"></div>
+                                                    </div>
+                                                    <div class="flex-1 p-3 rounded-lg bg-gray-50">
+                                                        <p class="text-sm font-semibold" x-text="comment.author.name">
+                                                        </p>
+                                                        <p class="text-gray-700" x-text="comment.body"></p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </template>
+                                        <template x-if="selectedTask && selectedTask.comments.length === 0">
+                                            <p class="text-gray-500">Belum ada komentar.</p>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="p-4 text-right border-t">
+                                    <button @click="isModalOpen = false"
+                                        class="px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100">Tutup</button>
                                 </div>
                             </div>
                         </div>

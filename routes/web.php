@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +31,9 @@ Route::middleware('auth')->group(function () {
 
     // Rute untuk update status tugas via drag-and-drop
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
+
+    // Rute untuk menyimpan komentar baru pada tugas
+    Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
 });
 
 require __DIR__ . '/auth.php';
