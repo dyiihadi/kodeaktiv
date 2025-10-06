@@ -51,21 +51,54 @@
                         </div>
                     @endif
 
-                    <h3 class="mb-4 text-lg font-bold">Tambah Tugas Baru</h3>
-                    <form method="POST" action="{{ route('tasks.store', $project) }}">
-                        @csrf
-                        <div>
-                            <x-input-label for="title" value="Judul Tugas" />
-                            <x-text-input id="title" class="block w-full mt-1" type="text" name="title"
-                                :value="old('title')" required autofocus />
-                            <x-input-error :messages="$errors->get('title')" class="mt-2" />
+                    <div class="mt-8">
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-3" id="kanban-board"
+                            data-project-id="{{ $project->id }}">
+
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <h3 class="mb-4 text-lg font-bold">To Do (Tugas Baru)</h3>
+                                <div class="space-y-4 kanban-column" data-status="To Do">
+                                    @foreach ($tasks['To Do'] ?? [] as $task)
+                                        <div class="p-4 bg-white border rounded-lg shadow"
+                                            data-task-id="{{ $task->id }}">
+                                            <p>{{ $task->title }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="mt-4">
+                                    <form method="POST" action="{{ route('tasks.store', $project) }}">
+                                        @csrf
+                                        <x-text-input class="block w-full text-sm" type="text" name="title"
+                                            placeholder="+ Tambah tugas baru" required />
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <h3 class="mb-4 text-lg font-bold">In Progress (Dikerjakan)</h3>
+                                <div class="space-y-4 kanban-column" data-status="In Progress">
+                                    @foreach ($tasks['In Progress'] ?? [] as $task)
+                                        <div class="p-4 bg-white border rounded-lg shadow"
+                                            data-task-id="{{ $task->id }}">
+                                            <p>{{ $task->title }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <h3 class="mb-4 text-lg font-bold">Done (Selesai)</h3>
+                                <div class="space-y-4 kanban-column" data-status="Done">
+                                    @foreach ($tasks['Done'] ?? [] as $task)
+                                        <div class="p-4 bg-white border rounded-lg shadow"
+                                            data-task-id="{{ $task->id }}">
+                                            <p class="text-gray-500 line-through">{{ $task->title }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex items-center justify-end mt-4">
-                            <x-primary-button>
-                                {{ __('Tambah Tugas') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
 

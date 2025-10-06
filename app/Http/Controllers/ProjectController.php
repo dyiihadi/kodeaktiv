@@ -42,11 +42,14 @@ class ProjectController extends Controller
 
     public function show(Project $project): View
     {
-        // Memuat tugas yang berhubungan dengan proyek ini
-        $project->load('tasks', 'members', 'owner');
+        $project->load('members', 'owner');
+
+        // Kelompokkan tugas berdasarkan status
+        $tasks = $project->tasks()->get()->groupBy('status');
 
         return view('projects.show', [
-            'project' => $project
+            'project' => $project,
+            'tasks' => $tasks
         ]);
     }
 }

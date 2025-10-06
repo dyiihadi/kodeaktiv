@@ -27,6 +27,9 @@ Route::middleware('auth')->group(function () {
 
     // Rute untuk menambah anggota ke proyek
     Route::post('/projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
+
+    // Rute untuk update status tugas via drag-and-drop
+    Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
 });
 
 require __DIR__ . '/auth.php';
