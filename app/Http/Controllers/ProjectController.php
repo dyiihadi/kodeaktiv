@@ -43,7 +43,7 @@ class ProjectController extends Controller
     public function show(Project $project): View
     {
         // Memuat tugas yang berhubungan dengan proyek ini
-        $project->load('tasks');
+        $project->load('tasks', 'members', 'owner');
 
         return view('projects.show', [
             'project' => $project

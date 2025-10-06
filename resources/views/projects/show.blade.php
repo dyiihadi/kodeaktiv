@@ -20,6 +20,37 @@
 
                     <hr class="my-6">
 
+                    <div class="p-4 mb-6 rounded-lg bg-gray-50">
+                        <h3 class="mb-4 text-lg font-bold">Anggota Tim</h3>
+                        <ul class="mb-4 space-y-2">
+                            <li>
+                                <span class="font-semibold">{{ $project->owner->name }}</span>
+                                <span
+                                    class="px-2 py-1 ml-2 text-xs text-green-800 bg-green-200 rounded-full">Pemilik</span>
+                            </li>
+                            @foreach ($project->members as $member)
+                                <li>{{ $member->name }}</li>
+                            @endforeach
+                        </ul>
+
+                        <form action="{{ route('projects.members.store', $project) }}" method="POST">
+                            @csrf
+                            <div class="flex gap-2">
+                                <x-text-input id="email" class="block w-full" type="email" name="email"
+                                    placeholder="Email anggota baru" required />
+                                <x-primary-button>Undang</x-primary-button>
+                            </div>
+                            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                        </form>
+                    </div>
+
+                    @if (session('status'))
+                        <div class="relative px-4 py-3 mb-4 text-green-700 bg-green-100 border border-green-400 rounded"
+                            role="alert">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
                     <h3 class="mb-4 text-lg font-bold">Tambah Tugas Baru</h3>
                     <form method="POST" action="{{ route('tasks.store', $project) }}">
                         @csrf
