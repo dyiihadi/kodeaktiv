@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,6 +20,9 @@ Route::middleware('auth')->group(function () {
 
     // Rute untuk mengelola proyek
     Route::resource('/projects', ProjectController::class);
+
+    // Rute untuk menyimpan tugas baru
+    Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('tasks.store');
 });
 
 require __DIR__ . '/auth.php';

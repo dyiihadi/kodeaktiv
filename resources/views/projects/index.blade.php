@@ -13,10 +13,11 @@
                         </a>
                     </div>
                     @forelse ($projects as $project)
-                        <div class="p-4 mb-4 border rounded-lg bg-gray-50">
+                        <a href="{{ route('projects.show', $project) }}"
+                            class="block p-4 mb-4 transition border rounded-lg bg-gray-50 hover:bg-gray-100">
                             <h3 class="text-lg font-bold">{{ $project->name }}</h3>
                             <p class="mt-2 text-gray-600">{{ $project->description }}</p>
-                        </div>
+                        </a>
                     @empty
                         <p>Kamu belum memiliki proyek.</p>
                     @endforelse

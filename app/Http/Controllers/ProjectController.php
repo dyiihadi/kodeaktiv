@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use App\Models\Project;
 
 class ProjectController extends Controller
 {
@@ -37,5 +38,15 @@ class ProjectController extends Controller
         $user->projects()->create($validated);
 
         return redirect(route('projects.index'))->with('status', 'Proyek berhasil dibuat!');
+    }
+
+    public function show(Project $project): View
+    {
+        // Memuat tugas yang berhubungan dengan proyek ini
+        $project->load('tasks');
+
+        return view('projects.show', [
+            'project' => $project
+        ]);
     }
 }
