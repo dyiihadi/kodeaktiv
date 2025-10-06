@@ -15,11 +15,17 @@
                     @forelse ($projects as $project)
                         <a href="{{ route('projects.show', $project) }}"
                             class="block p-4 mb-4 transition border rounded-lg bg-gray-50 hover:bg-gray-100">
-                            <h3 class="text-lg font-bold">{{ $project->name }}</h3>
+                            <div class="flex items-start justify-between">
+                                <h3 class="text-lg font-bold">{{ $project->name }}</h3>
+                                @if ($project->owner->id !== Auth::id())
+                                    <span
+                                        class="px-2 py-1 text-xs text-indigo-800 bg-indigo-100 rounded-full">Dibagikan</span>
+                                @endif
+                            </div>
                             <p class="mt-2 text-gray-600">{{ $project->description }}</p>
+                            <p class="mt-4 text-sm text-gray-500">Pemilik: {{ $project->owner->name }}</p>
                         </a>
                     @empty
-                        <p>Kamu belum memiliki proyek.</p>
                     @endforelse
                 </div>
             </div>

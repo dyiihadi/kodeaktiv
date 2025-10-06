@@ -15,9 +15,19 @@ class ProjectController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $projects = $user->projects()->latest()->get();
 
-        return view('projects.index', ['projects' => $projects]);
+        // 1. Ambil proyek yang dimiliki oleh user
+        $ownedProjects = $user->projects()->with('owner')->get();
+
+        // 2. Ambil proyek di mana user menjadi anggota (diundang)
+        $sharedProjects = $user->sharedProjects()->with('owner')->get();
+
+        // 3. Gabungkan kedua daftar proyek tersebut
+        $projects = $ownedProjects->merge($sharedProjects)->unique('id');
+
+        return view('projects.index', [
+            'projects' => $projects,
+        ]);
     }
 
     public function create(): View
