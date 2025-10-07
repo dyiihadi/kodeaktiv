@@ -5,6 +5,8 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ProjectFileController;
+use App\Http\Controllers\FileCommentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,6 +36,10 @@ Route::middleware('auth')->group(function () {
 
     // Rute untuk menyimpan komentar baru pada tugas
     Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
+
+    Route::post('/projects/{project}/files', [ProjectFileController::class, 'store'])->name('projects.files.store');
+
+    Route::post('/files/{file}/comments', [FileCommentController::class, 'store'])->name('files.comments.store');
 });
 
 require __DIR__ . '/auth.php';

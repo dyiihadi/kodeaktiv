@@ -56,6 +56,62 @@
                         selectedTask: null,
                         tasks: {{ json_encode($tasks->flatten()) }}
                     }" x-init="$watch('tasks', value => console.log(value))">
+                        <div class="p-6 mb-6 bg-white rounded-lg shadow-sm">
+                            <h3 class="mb-4 text-lg font-bold">File Proyek</h3>
+
+                            <form action="{{ route('projects.files.store', $project) }}" method="POST"
+                                enctype="multipart/form-data" class="mb-4">
+                                @csrf
+                                <div class="flex gap-2">
+                                    <input type="file" name="file"
+                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                                        required>
+                                    <x-primary-button>Unggah</x-primary-button>
+                                </div>
+                                <x-input-error :messages="$errors->get('file')" class="mt-2" />
+                            </form>
+
+                            <div class="space-y-2">
+                                @forelse ($project->files as $file)
+                                    <div class="p-3 border rounded-lg">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <a href="{{ Storage::url($file->path) }}" target="_blank"
+                                                    class="font-semibold text-blue-600 hover:underline">{{ $file->original_name }}</a>
+                                                <p class="text-sm text-gray-500">Diunggah oleh
+                                                    {{ $file->uploader->name }} ({{ round($file->size / 1024, 2) }}
+                                                    KB)</p>
+                                            </div>
+                                        </div>
+                                        <div class="pt-4 mt-4 border-t">
+                                            <h4 class="mb-2 text-sm font-semibold">Diskusi File</h4>
+                                            <form action="{{ route('files.comments.store', $file) }}" method="POST"
+                                                class="mb-3">
+                                                @csrf
+                                                <div class="flex gap-2">
+                                                    <x-text-input name="body" class="w-full text-sm"
+                                                        placeholder="Tulis komentar..." required />
+                                                    <x-primary-button class="text-xs">Kirim</x-primary-button>
+                                                </div>
+                                            </form>
+                                            <div class="space-y-2">
+                                                @forelse ($file->comments as $comment)
+                                                    <div class="text-sm">
+                                                        <span
+                                                            class="font-semibold">{{ $comment->author->name }}:</span>
+                                                        <span class="text-gray-700">{{ $comment->body }}</span>
+                                                    </div>
+                                                @empty
+                                                    <p class="text-sm text-gray-500">Belum ada komentar.</p>
+                                                @endforelse
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <p class="text-gray-500">Belum ada file yang diunggah.</p>
+                                @endforelse
+                            </div>
+                        </div>
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-3" id="kanban-board"
                             data-project-id="{{ $project->id }}">
 
@@ -116,7 +172,8 @@
                             <div @click.outside="isModalOpen = false"
                                 class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                                 <div class="p-4 border-b">
-                                    <h2 class="text-xl font-bold" x-text="selectedTask ? selectedTask.title : ''"></h2>
+                                    <h2 class="text-xl font-bold" x-text="selectedTask ? selectedTask.title : ''">
+                                    </h2>
                                 </div>
                                 <div class="p-6 overflow-y-auto">
                                     <form method="POST"

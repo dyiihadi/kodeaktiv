@@ -52,9 +52,14 @@ class ProjectController extends Controller
 
     public function show(Project $project): View
     {
-        $project->load('members', 'owner');
+        // Muat semua relasi yang dibutuhkan oleh view
+        $project->load([
+            'members',
+            'owner',
+            'files.uploader',
+            'files.comments.author' // <-- Tambahkan ini
+        ]);
 
-        // Eager load tasks beserta relasi comments dan author dari comment
         $tasks = $project->tasks()->with('comments.author')->get()->groupBy('status');
 
         return view('projects.show', [

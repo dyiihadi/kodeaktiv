@@ -26,4 +26,9 @@ class Project extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(ProjectFile::class)->latest();
+    }
 }
