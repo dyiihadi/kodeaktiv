@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Project;
+use App\Models\Comment;
+use App\Models\Task;
 
 class ProjectController extends Controller
 {
@@ -106,5 +108,30 @@ class ProjectController extends Controller
         $project->delete();
 
         return redirect(route('projects.index'))->with('status', 'Proyek berhasil dihapus!');
+    }
+
+    public function dashboard(): View
+    {
+        $user = Auth::user();
+        $ownedProjects = $user->projects;
+        $sharedProjects = $user->sharedProjects;
+        $allProjects = $ownedProjects->merge($sharedProjects)->unique('id');
+        $projectIds = $allProjects->pluck('id');
+
+        $allTasks = Task::whereIn('project_id', $projectIds)->get();
+        $taskCounts = $allTasks->groupBy('status')->map(fn($group) => $group->count());
+
+        // Mengambil 5 aktivitas terakhir (tugas atau komentar baru)
+        $recentTasks = Task::whereIn('project_id', $projectIds)->latest()->take(3)->get();
+        $recentComments = Comment::whereIn('task_id', $allTasks->pluck('id'))->with('task.project')->latest()->take(3)->get();
+
+        $recentActivities = $recentTasks->concat($recentComments)->sortByDesc('created_at')->take(5);
+
+        return view('dashboard', [
+            'totalProjects' => $allProjects->count(),
+            'totalTasks' => $allTasks->count(),
+            'tasksDone' => $taskCounts->get('Done', 0),
+            'recentActivities' => $recentActivities,
+        ]);
     }
 }
