@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
     // Rute untuk menambah anggota ke proyek
     Route::post('/projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
 
+    // Rute untuk menghapus anggota dari proyek
+    Route::delete('/projects/{project}/members/{user}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
+
     // Rute untuk update status tugas via drag-and-drop
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
 

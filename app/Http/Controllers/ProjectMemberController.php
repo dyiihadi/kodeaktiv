@@ -33,4 +33,19 @@ class ProjectMemberController extends Controller
 
         return redirect()->route('projects.show', $project)->with('status', 'Anggota berhasil ditambahkan!');
     }
+
+    /**
+     * Menghapus anggota dari proyek.
+     */
+    public function destroy(Project $project, User $user)
+    {
+        // 1. Otorisasi: Pastikan user yang login adalah pemilik proyek
+        $this->authorize('removeMember', $project);
+
+        // 2. Lepaskan relasi user dari proyek di pivot table
+        $project->members()->detach($user->id);
+
+        // 3. Kembali ke halaman sebelumnya dengan pesan sukses
+        return back()->with('status', 'Anggota tim berhasil dihapus.');
+    }
 }

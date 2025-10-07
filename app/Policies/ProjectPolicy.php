@@ -63,4 +63,10 @@ class ProjectPolicy
     {
         return false;
     }
+
+    public function removeMember(User $user, Project $project): bool
+    {
+        // Hanya pemilik proyek yang bisa menghapus anggota
+        return $user->id === $project->user_id;
+    }
 }

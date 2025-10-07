@@ -38,7 +38,21 @@
                                     class="px-2 py-1 ml-2 text-xs text-green-800 bg-green-200 rounded-full">Pemilik</span>
                             </li>
                             @foreach ($project->members as $member)
-                                <li>{{ $member->name }}</li>
+                                <li class="flex items-center justify-between">
+                                    <span>{{ $member->name }}</span>
+
+                                    @can('removeMember', $project)
+                                        <form action="{{ route('projects.members.destroy', [$project, $member]) }}"
+                                            method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type-="submit" class="text-xs text-red-500 hover:text-red-700"
+                                                onclick="return confirm('Anda yakin ingin menghapus anggota ini?')">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    @endcan
+                                </li>
                             @endforeach
                         </ul>
 
