@@ -25,20 +25,18 @@ Route::middleware('auth')->group(function () {
     // Rute untuk mengelola proyek
     Route::resource('/projects', ProjectController::class);
 
-    // Rute untuk menyimpan tugas baru
-    Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('tasks.store');
+    // Mengelompokkan semua rute yang berhubungan dengan tugas
+    Route::resource('tasks', TaskController::class)->only(['store', 'update', 'destroy']);
+
+    // Rute untuk status dan komentar tetap terpisah karena strukturnya unik
+    Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
+    Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
 
     // Rute untuk menambah anggota ke proyek
     Route::post('/projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
 
     // Rute untuk menghapus anggota dari proyek
     Route::delete('/projects/{project}/members/{user}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
-
-    // Rute untuk update status tugas via drag-and-drop
-    Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
-
-    // Rute untuk menyimpan komentar baru pada tugas
-    Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
 
     Route::post('/projects/{project}/files', [ProjectFileController::class, 'store'])->name('projects.files.store');
 
