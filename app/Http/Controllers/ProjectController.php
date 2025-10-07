@@ -35,6 +35,35 @@ class ProjectController extends Controller
         return view('projects.create');
     }
 
+    /**
+     * Menampilkan form untuk mengedit proyek.
+     */
+    public function edit(Project $project): View
+    {
+        $this->authorize('update', $project); // Otorisasi
+        return view('projects.edit', ['project' => $project]);
+    }
+
+    /**
+     * Memperbarui proyek di database.
+     */
+    public function update(Request $request, Project $project): RedirectResponse
+    {
+        // Otorisasi tetap dilakukan untuk keamanan berlapis
+        $this->authorize('update', $project);
+
+        // Validasi input seperti biasa
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        // Lakukan update HANYA pada field yang divalidasi
+        $project->update($validated);
+
+        return redirect(route('projects.show', $project))->with('status', 'Proyek berhasil diperbarui!');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -66,5 +95,16 @@ class ProjectController extends Controller
             'project' => $project,
             'tasks' => $tasks,
         ]);
+    }
+    /**
+     * Menghapus proyek dari database.
+     */
+    public function destroy(Project $project): RedirectResponse
+    {
+        $this->authorize('delete', $project); // Otorisasi
+
+        $project->delete();
+
+        return redirect(route('projects.index'))->with('status', 'Proyek berhasil dihapus!');
     }
 }

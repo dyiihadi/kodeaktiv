@@ -1,8 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Detail Proyek: {{ $project->name }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                Detail Proyek: {{ $project->name }}
+            </h2>
+
+            @can('update', $project)
+                <a href="{{ route('projects.edit', $project) }}"
+                    class="px-4 py-2 text-sm font-bold text-white bg-yellow-500 rounded hover:bg-yellow-600">
+                    Edit Proyek
+                </a>
+            @endcan
+        </div>
     </x-slot>
 
     <div class="py-12">
