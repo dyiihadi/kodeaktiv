@@ -34,16 +34,24 @@
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 @forelse ($projects as $project)
                     <a href="{{ route('projects.show', $project) }}"
-                        class="block p-6 transition-transform duration-300 transform glass-panel rounded-2xl hover:-translate-y-1">
-                        <div class="flex items-start justify-between">
-                            <h3 class="text-lg font-bold text-white">{{ $project->name }}</h3>
-                            @if ($project->owner->id !== Auth::id())
-                                <span
-                                    class="px-2 py-1 text-xs text-indigo-200 rounded-full bg-indigo-500/50">Dibagikan</span>
-                            @endif
+                        class="flex flex-col justify-between p-6 transition-transform duration-300 transform glass-panel rounded-2xl hover:-translate-y-1">
+                        <div>
+                            <div class="flex items-start justify-between">
+                                <h3 class="text-lg font-bold text-white">{{ $project->name }}</h3>
+                                @if ($project->owner->id !== Auth::id())
+                                    <span
+                                        class="px-2 py-1 text-xs text-indigo-200 rounded-full bg-indigo-500/50">Dibagikan</span>
+                                @endif
+                            </div>
+                            <p class="mt-2 text-sm text-gray-300">{{ Str::limit($project->description, 100) }}</p>
                         </div>
-                        <p class="mt-2 text-sm text-gray-300">{{ Str::limit($project->description, 100) }}</p>
-                        <p class="mt-4 text-xs text-gray-400">Pemilik: {{ $project->owner->name }}</p>
+                        <div class="mt-4">
+                            <p class="text-xs text-gray-400">Pemilik: {{ $project->owner->name }}</p>
+                            {{-- Penambahan Informasi Waktu --}}
+                            <p class="mt-1 text-xs text-gray-400">
+                                Dibuat: {{ $project->created_at->format('d M Y') }}
+                            </p>
+                        </div>
                     </a>
                 @empty
                     <div class="py-16 text-center lg:col-span-3 glass-panel rounded-2xl">
