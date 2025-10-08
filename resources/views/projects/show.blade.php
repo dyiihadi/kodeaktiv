@@ -38,6 +38,12 @@
                     <div>
                         <h3 class="text-lg font-bold">Deskripsi Proyek</h3>
                         <p class="mt-1 text-gray-300">{{ $project->description ?: 'Tidak ada deskripsi.' }}</p>
+
+                        {{-- Penambahan Informasi Waktu --}}
+                        <div class="mt-4 text-xs text-gray-400">
+                            <p>Dibuat pada: {{ $project->created_at->format('d F Y, H:i') }}</p>
+                            <p>Pembaruan terakhir: {{ $project->updated_at->diffForHumans() }}</p>
+                        </div>
                     </div>
                     <div class="p-4 rounded-lg bg-white/5">
                         <h3 class="mb-2 text-lg font-bold">Anggota Tim</h3>
@@ -97,7 +103,8 @@
                                 <div>
                                     <a href="{{ Storage::url($file->path) }}" target="_blank"
                                         class="font-semibold text-indigo-400 hover:underline">{{ $file->original_name }}</a>
-                                    <p class="text-sm text-gray-400">Diunggah oleh {{ $file->uploader->name }}</p>
+                                    <p class="text-sm text-gray-400">Diunggah oleh {{ $file->uploader->name }} pada
+                                        {{ $file->created_at->format('d M Y, H:i') }}</p>
                                 </div>
                                 <div class="pt-3 mt-3 border-t border-white/10">
                                     <h4 class="mb-2 text-sm font-semibold">Diskusi File</h4>
@@ -113,9 +120,16 @@
                                     <div class="space-y-2">
                                         @foreach ($file->comments as $comment)
                                             <div class="text-sm">
-                                                <span
-                                                    class="font-semibold text-gray-300">{{ $comment->author->name }}:</span>
-                                                <span class="text-gray-400">{{ $comment->body }}</span>
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold text-gray-300">
+                                                        {{ $comment->author->name }}:
+                                                    </span>
+                                                    {{-- Perubahan 1: Tambahkan waktu komentar file --}}
+                                                    <span class="text-xs text-gray-500">
+                                                        {{ $comment->created_at->diffForHumans() }}
+                                                    </span>
+                                                </div>
+                                                <p class="pl-2 text-gray-400">{{ $comment->body }}</p>
                                             </div>
                                         @endforeach
                                     </div>
@@ -132,7 +146,22 @@
                 isModalOpen: false,
                 isEditing: false,
                 selectedTask: null,
-                tasks: {{ json_encode($tasks->flatten()) }}
+                tasks: {{ json_encode($tasks->flatten()) }},
+                timeAgo(dateString) {
+                    const date = new Date(dateString);
+                    const seconds = Math.floor((new Date() - date) / 1000);
+                    let interval = seconds / 31536000;
+                    if (interval > 1) return Math.floor(interval) + ' tahun lalu';
+                    interval = seconds / 2592000;
+                    if (interval > 1) return Math.floor(interval) + ' bulan lalu';
+                    interval = seconds / 86400;
+                    if (interval > 1) return Math.floor(interval) + ' hari lalu';
+                    interval = seconds / 3600;
+                    if (interval > 1) return Math.floor(interval) + ' jam lalu';
+                    interval = seconds / 60;
+                    if (interval > 1) return Math.floor(interval) + ' menit lalu';
+                    return 'Baru saja';
+                }
             }">
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3" id="kanban-board">
                     <div class="p-4 rounded-lg glass-panel">
@@ -213,9 +242,14 @@
                                         <div class="mt-4 space-y-3">
                                             <template x-for="comment in selectedTask.comments" :key="comment.id">
                                                 <div class="text-sm">
-                                                    <span class="font-semibold text-gray-200"
-                                                        x-text="comment.author.name + ':'"></span>
-                                                    <span class="text-gray-300" x-text="comment.body"></span>
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="font-semibold text-gray-200"
+                                                            x-text="comment.author.name + ':'"></span>
+                                                        {{-- Perubahan 2: Tambahkan waktu komentar tugas --}}
+                                                        <span class="text-xs text-gray-500"
+                                                            x-text="timeAgo(comment.created_at)"></span>
+                                                    </div>
+                                                    <p class="pl-2 text-gray-300" x-text="comment.body"></p>
                                                 </div>
                                             </template>
                                         </div>
