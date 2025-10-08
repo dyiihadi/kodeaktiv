@@ -39,6 +39,8 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/projects/{project}/files', [ProjectFileController::class, 'store'])->name('projects.files.store');
 
+    Route::delete('/files/{file}', [ProjectFileController::class, 'destroy'])->name('projects.files.destroy');
+
     Route::post('/files/{file}/comments', [FileCommentController::class, 'store'])->name('files.comments.store');
 });
 

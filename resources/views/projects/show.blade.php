@@ -100,12 +100,28 @@
                     <div class="space-y-3">
                         @forelse ($project->files as $file)
                             <div class="p-3 border rounded-lg border-white/10 bg-white/5">
-                                <div>
-                                    <a href="{{ Storage::url($file->path) }}" target="_blank"
-                                        class="font-semibold text-indigo-400 hover:underline">{{ $file->original_name }}</a>
-                                    <p class="text-sm text-gray-400">Diunggah oleh {{ $file->uploader->name }} pada
-                                        {{ $file->created_at->format('d M Y, H:i') }}</p>
+                                {{-- Bagian Informasi File & Tombol Hapus --}}
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <a href="{{ Storage::url($file->path) }}" target="_blank"
+                                            class="font-semibold text-indigo-400 hover:underline">{{ $file->original_name }}</a>
+                                        <p class="text-sm text-gray-400">Diunggah oleh {{ $file->uploader->name }} pada
+                                            {{ $file->created_at->format('d M Y, H:i') }}</p>
+                                    </div>
+                                    {{-- Tombol Hapus hanya muncul jika diizinkan oleh Policy --}}
+                                    @can('delete', $file)
+                                        <form action="{{ route('projects.files.destroy', $file) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs text-red-400 hover:text-red-300"
+                                                onclick="return confirm('Anda yakin ingin menghapus file ini?')">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
+
+                                {{-- Bagian Diskusi File (Tidak berubah) --}}
                                 <div class="pt-3 mt-3 border-t border-white/10">
                                     <h4 class="mb-2 text-sm font-semibold">Diskusi File</h4>
                                     <form action="{{ route('files.comments.store', $file) }}" method="POST"
@@ -124,7 +140,6 @@
                                                     <span class="font-semibold text-gray-300">
                                                         {{ $comment->author->name }}:
                                                     </span>
-                                                    {{-- Perubahan 1: Tambahkan waktu komentar file --}}
                                                     <span class="text-xs text-gray-500">
                                                         {{ $comment->created_at->diffForHumans() }}
                                                     </span>
