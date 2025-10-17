@@ -25,6 +25,6 @@ class ProjectFile extends Model
 
     public function comments(): HasMany
     {
-        return $this->hasMany(FileComment::class)->latest();
+        return $this->hasMany(FileComment::class)->oldest();
     }
 }
