@@ -53,6 +53,6 @@ class Task extends Model
 
     public function comments(): HasMany
     {
-        return $this->hasMany(Comment::class)->latest(); // Tampilkan komentar terbaru di atas
+        return $this->hasMany(Comment::class)->oldest(); // Tampilkan komentar terbaru di atas
     }
 }
