@@ -22,6 +22,16 @@ class Task extends Model
         'status',
         'project_id',
         'user_id',
+        'due_date',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'due_date' => 'date', // <-- TAMBAHKAN BLOK INI
     ];
 
     /**

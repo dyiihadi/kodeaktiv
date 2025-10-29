@@ -12,6 +12,15 @@ class Project extends Model
     use HasFactory;
     protected $fillable = ['name', 'description', 'due_date'];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'due_date' => 'date', // <-- TAMBAHKAN BLOK INI
+    ];
+
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');

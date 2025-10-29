@@ -39,6 +39,17 @@
                         <h3 class="text-lg font-bold">Deskripsi Proyek</h3>
                         <p class="mt-1 text-gray-300">{{ $project->description ?: 'Tidak ada deskripsi.' }}</p>
 
+                        @if ($project->due_date)
+                            <div class="mt-4">
+                                <span class="text-sm font-semibold text-gray-300">Tenggat Waktu:</span>
+                                <span
+                                    class="text-sm font-bold {{ $project->due_date->isPast() ? 'text-red-400' : 'text-yellow-500' }}">
+                                    {{ $project->due_date->format('d F Y') }}
+                                    ({{ $project->due_date->diffForHumans() }})
+                                </span>
+                            </div>
+                        @endif
+
                         {{-- Penambahan Informasi Waktu --}}
                         <div class="mt-4 text-xs text-gray-400">
                             <p>Dibuat pada: {{ $project->created_at->format('d F Y, H:i') }}</p>
@@ -188,6 +199,18 @@
                                     class="w-full p-4 text-left border rounded-lg shadow-md bg-white/5 border-white/10 hover:bg-white/10"
                                     data-task-id="{{ $task->id }}">
                                     <p class="text-white">{{ $task->title }}</p>
+                                    @if ($task->due_date)
+                                        <div
+                                            class="flex items-center mt-2 text-xs {{ $task->due_date->isPast() ? 'text-red-400' : 'text-gray-400' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <span>{{ $task->due_date->format('d M') }}</span>
+                                        </div>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -209,6 +232,18 @@
                                     class="w-full p-4 text-left border rounded-lg shadow-md bg-white/5 border-white/10 hover:bg-white/10"
                                     data-task-id="{{ $task->id }}">
                                     <p class="text-white">{{ $task->title }}</p>
+                                    @if ($task->due_date)
+                                        <div
+                                            class="flex items-center mt-2 text-xs {{ $task->due_date->isPast() ? 'text-red-400' : 'text-gray-400' }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <span>{{ $task->due_date->format('d M') }}</span>
+                                        </div>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -222,6 +257,18 @@
                                     class="w-full p-4 text-left border rounded-lg shadow-md bg-white/5 border-white/10 hover:bg-white/10"
                                     data-task-id="{{ $task->id }}">
                                     <p class="text-gray-400 line-through">{{ $task->title }}</p>
+                                    @if ($task->due_date)
+                                        <div class="flex items-center mt-2 text-xs text-gray-500">
+                                            {{-- <-- Ubah kelas di sini --}}
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <span>{{ $task->due_date->format('d M') }}</span>
+                                        </div>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -247,6 +294,21 @@
                                     <div class="p-6 overflow-y-auto">
                                         <p class="mb-6 text-gray-300"
                                             x-text="selectedTask.description || 'Tidak ada deskripsi.'"></p>
+                                        <template x-if="selectedTask.due_date">
+                                            <div class="mb-4">
+                                                <span class="text-sm font-semibold text-gray-300">Tenggat Waktu:</span>
+                                                <span class="text-sm font-bold"
+                                                    :class="{
+                                                        'text-red-400': new Date(selectedTask.due_date) < new Date() &&
+                                                            selectedTask.status !== 'Done',
+                                                        'text-yellow-500': new Date(selectedTask.due_date) >=
+                                                            new Date() && selectedTask.status !== 'Done',
+                                                        'text-green-400': selectedTask.status === 'Done'
+                                                    }"
+                                                    x-text="new Date(selectedTask.due_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })">
+                                                </span>
+                                            </div>
+                                        </template>
                                         <h4 class="mb-2 text-sm font-semibold text-white">Diskusi Tugas</h4>
                                         <form method="POST" :action="'/tasks/' + selectedTask.id + '/comments'">
                                             @csrf
@@ -282,6 +344,12 @@
                                             <textarea name="description" x-model="selectedTask.description"
                                                 class="w-full text-gray-200 border-gray-500 rounded-md shadow-sm bg-white/5" rows="4"
                                                 placeholder="Tambahkan deskripsi..."></textarea>
+                                            <div class="mt-4">
+                                                <x-input-label for="task_due_date" :value="__('Tenggat Waktu')"
+                                                    class="text-white" />
+                                                <x-text-input id="task_due_date" type="date" name="due_date"
+                                                    class="block w-full mt-1" ::value="selectedTask.due_date ? selectedTask.due_date.substring(0, 10) : ''" />
+                                            </div>
                                             <div class="flex justify-end gap-2 mt-4">
                                                 <button type="button" @click="isEditing = false"
                                                     class="px-4 py-2 text-sm text-gray-300 rounded-lg hover:bg-white/10">Batal</button>

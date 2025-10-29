@@ -51,6 +51,12 @@
                             <p class="mt-1 text-xs text-gray-400">
                                 Dibuat: {{ $project->created_at->format('d M Y') }}
                             </p>
+                            @if ($project->due_date)
+                                <p
+                                    class="mt-1 text-xs font-semibold {{ $project->due_date->isPast() ? 'text-red-400' : 'text-yellow-400' }}">
+                                    Tenggat: {{ $project->due_date->format('d M Y') }}
+                                </p>
+                            @endif
                         </div>
                     </a>
                 @empty
