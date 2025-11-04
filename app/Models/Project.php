@@ -38,6 +38,6 @@ class Project extends Model
 
     public function files(): HasMany
     {
-        return $this->hasMany(ProjectFile::class)->latest();
+        return $this->hasMany(ProjectFile::class)->oldest();
     }
 }
