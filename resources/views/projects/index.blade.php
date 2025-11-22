@@ -2,7 +2,6 @@
     <style>
         .glass-panel {
             background: rgba(31, 41, 55, 0.5);
-            /* bg-gray-800 with opacity */
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -47,16 +46,26 @@
                         </div>
                         <div class="mt-4">
                             <p class="text-xs text-gray-400">Pemilik: {{ $project->owner->name }}</p>
-                            {{-- Penambahan Informasi Waktu --}}
-                            <p class="mt-1 text-xs text-gray-400">
-                                Dibuat: {{ $project->created_at->format('d M Y') }}
-                            </p>
-                            @if ($project->due_date)
-                                <p
-                                    class="mt-1 text-xs font-semibold {{ $project->due_date->isPast() ? 'text-red-400' : 'text-yellow-400' }}">
-                                    Tenggat: {{ $project->due_date->format('d M Y') }}
-                                </p>
-                            @endif
+
+                            {{-- Menampilkan Durasi Proyek --}}
+                            <div class="mt-2 text-xs text-gray-400">
+                                @if ($project->start_date)
+                                    <div class="flex items-center gap-1">
+                                        <span>Mulai:</span>
+                                        <span class="text-white">{{ $project->start_date->format('d M Y') }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($project->due_date)
+                                    <div class="flex items-center gap-1 mt-1">
+                                        <span>Selesai:</span>
+                                        <span
+                                            class="font-semibold {{ $project->due_date->isPast() ? 'text-red-400' : 'text-yellow-400' }}">
+                                            {{ $project->due_date->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     </a>
                 @empty

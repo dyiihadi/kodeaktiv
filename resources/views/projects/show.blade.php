@@ -2,7 +2,6 @@
     <style>
         .glass-panel {
             background: rgba(31, 41, 55, 0.5);
-            /* bg-gray-800 with opacity */
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -39,23 +38,36 @@
                         <h3 class="text-lg font-bold">Deskripsi Proyek</h3>
                         <p class="mt-1 text-gray-300">{{ $project->description ?: 'Tidak ada deskripsi.' }}</p>
 
-                        @if ($project->due_date)
-                            <div class="mt-4">
-                                <span class="text-sm font-semibold text-gray-300">Tenggat Waktu:</span>
-                                <span
-                                    class="text-sm font-bold {{ $project->due_date->isPast() ? 'text-red-400' : 'text-yellow-500' }}">
-                                    {{ $project->due_date->format('d F Y') }}
-                                    ({{ $project->due_date->diffForHumans() }})
-                                </span>
-                            </div>
-                        @endif
+                        {{-- Informasi Tanggal Lengkap --}}
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            @if ($project->start_date)
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-400">Tanggal Mulai:</span>
+                                    <div class="text-sm font-bold text-white">
+                                        {{ $project->start_date->format('d F Y') }}
+                                    </div>
+                                </div>
+                            @endif
 
-                        {{-- Penambahan Informasi Waktu --}}
-                        <div class="mt-4 text-xs text-gray-400">
+                            @if ($project->due_date)
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-400">Tenggat Waktu:</span>
+                                    <div
+                                        class="text-sm font-bold {{ $project->due_date->isPast() ? 'text-red-400' : 'text-yellow-500' }}">
+                                        {{ $project->due_date->format('d F Y') }}
+                                        <span class="text-xs font-normal text-gray-300">
+                                            ({{ $project->due_date->diffForHumans() }})
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="mt-4 text-xs text-gray-500">
                             <p>Dibuat pada: {{ $project->created_at->format('d F Y, H:i') }}</p>
-                            <p>Pembaruan terakhir: {{ $project->updated_at->diffForHumans() }}</p>
                         </div>
                     </div>
+
                     <div class="p-4 rounded-lg bg-white/5">
                         <h3 class="mb-2 text-lg font-bold">Anggota Tim</h3>
                         <ul class="mb-4 space-y-2">
@@ -111,7 +123,6 @@
                     <div class="space-y-3">
                         @forelse ($project->files as $file)
                             <div class="p-3 border rounded-lg border-white/10 bg-white/5">
-                                {{-- Bagian Informasi File & Tombol Hapus --}}
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <a href="{{ Storage::url($file->path) }}" target="_blank"
@@ -119,7 +130,6 @@
                                         <p class="text-sm text-gray-400">Diunggah oleh {{ $file->uploader->name }} pada
                                             {{ $file->created_at->format('d M Y, H:i') }}</p>
                                     </div>
-                                    {{-- Tombol Hapus hanya muncul jika diizinkan oleh Policy --}}
                                     @can('delete', $file)
                                         <form action="{{ route('projects.files.destroy', $file) }}" method="POST">
                                             @csrf
@@ -132,7 +142,6 @@
                                     @endcan
                                 </div>
 
-                                {{-- Bagian Diskusi File (Tidak berubah) --}}
                                 <div class="pt-3 mt-3 border-t border-white/10">
                                     <h4 class="mb-2 text-sm font-semibold">Diskusi File</h4>
                                     <form action="{{ route('files.comments.store', $file) }}" method="POST"
@@ -190,6 +199,7 @@
                 }
             }">
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-3" id="kanban-board">
+                    {{-- Kolom To Do --}}
                     <div class="p-4 rounded-lg glass-panel">
                         <h3 class="mb-4 text-lg font-bold text-white">To Do</h3>
                         <div class="space-y-4 kanban-column min-h-[100px]" data-status="To Do">
@@ -223,6 +233,8 @@
                             </form>
                         </div>
                     </div>
+
+                    {{-- Kolom In Progress --}}
                     <div class="p-4 rounded-lg glass-panel">
                         <h3 class="mb-4 text-lg font-bold text-white">In Progress</h3>
                         <div class="space-y-4 kanban-column min-h-[100px]" data-status="In Progress">
@@ -248,6 +260,8 @@
                             @endforeach
                         </div>
                     </div>
+
+                    {{-- Kolom Done --}}
                     <div class="p-4 rounded-lg glass-panel">
                         <h3 class="mb-4 text-lg font-bold text-white">Done</h3>
                         <div class="space-y-4 kanban-column min-h-[100px]" data-status="Done">
@@ -259,7 +273,6 @@
                                     <p class="text-gray-400 line-through">{{ $task->title }}</p>
                                     @if ($task->due_date)
                                         <div class="flex items-center mt-2 text-xs text-gray-500">
-                                            {{-- <-- Ubah kelas di sini --}}
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
                                                 viewBox="0 0 20 20" fill="currentColor">
                                                 <path fill-rule="evenodd"
@@ -275,6 +288,7 @@
                     </div>
                 </div>
 
+                {{-- Modal Task --}}
                 <div x-show="isModalOpen" class="fixed inset-0 z-40 bg-black bg-opacity-50"
                     @click="isModalOpen = false" x-cloak></div>
                 <div x-show="isModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -322,7 +336,6 @@
                                                     <div class="flex items-center justify-between">
                                                         <span class="font-semibold text-gray-200"
                                                             x-text="comment.author.name + ':'"></span>
-                                                        {{-- Perubahan 2: Tambahkan waktu komentar tugas --}}
                                                         <span class="text-xs text-gray-500"
                                                             x-text="timeAgo(comment.created_at)"></span>
                                                     </div>

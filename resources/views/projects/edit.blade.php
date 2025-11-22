@@ -2,7 +2,6 @@
     <style>
         .glass-panel {
             background: rgba(31, 41, 55, 0.5);
-            /* bg-gray-800 with opacity */
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -35,6 +34,29 @@
                             <textarea id="description" name="description"
                                 class="block w-full mt-1 text-white border-gray-300 rounded-md shadow-sm bg-white/10 focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $project->description) }}</textarea>
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
+                        </div>
+
+                        {{-- Grid untuk Tanggal Mulai & Tenggat --}}
+                        <div class="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2">
+                            <div>
+                                <x-input-label for="start_date" :value="__('Tanggal Mulai')" class="text-white" />
+                                <x-text-input id="start_date" class="block w-full mt-1" type="date" name="start_date"
+                                    :value="old(
+                                        'start_date',
+                                        $project->start_date ? $project->start_date->format('Y-m-d') : '',
+                                    )" />
+                                <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="due_date" :value="__('Tenggat Waktu (Deadline)')" class="text-white" />
+                                <x-text-input id="due_date" class="block w-full mt-1" type="date" name="due_date"
+                                    :value="old(
+                                        'due_date',
+                                        $project->due_date ? $project->due_date->format('Y-m-d') : '',
+                                    )" />
+                                <x-input-error :messages="$errors->get('due_date')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">

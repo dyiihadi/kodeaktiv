@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Project extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'description', 'due_date'];
+    protected $fillable = ['name', 'description', 'start_date', 'due_date'];
 
     /**
      * The attributes that should be cast.
@@ -18,6 +18,7 @@ class Project extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'start_date' => 'date',
         'due_date' => 'date', // <-- TAMBAHKAN BLOK INI
     ];
 

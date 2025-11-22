@@ -58,6 +58,9 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            // Validasi: due_date harus setelah atau sama dengan start_date jika start_date diisi
+            'due_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         // Lakukan update HANYA pada field yang divalidasi
@@ -71,7 +74,9 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'due_date' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            // Validasi: due_date harus setelah atau sama dengan start_date
+            'due_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         /** @var \App\Models\User $user */
