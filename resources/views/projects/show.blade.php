@@ -2,6 +2,7 @@
     <style>
         .glass-panel {
             background: rgba(31, 41, 55, 0.5);
+            /* bg-gray-800 with opacity */
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -32,13 +33,13 @@
                 </div>
             @endif
 
+            {{-- Bagian Detail Proyek --}}
             <div class="p-6 mb-8 text-white glass-panel sm:rounded-lg">
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div>
                         <h3 class="text-lg font-bold">Deskripsi Proyek</h3>
                         <p class="mt-1 text-gray-300">{{ $project->description ?: 'Tidak ada deskripsi.' }}</p>
 
-                        {{-- Informasi Tanggal Lengkap --}}
                         <div class="grid grid-cols-2 gap-4 mt-4">
                             @if ($project->start_date)
                                 <div>
@@ -65,9 +66,9 @@
 
                         <div class="mt-4 text-xs text-gray-500">
                             <p>Dibuat pada: {{ $project->created_at->format('d F Y, H:i') }}</p>
+                            <p>Pembaruan terakhir: {{ $project->updated_at->diffForHumans() }}</p>
                         </div>
                     </div>
-
                     <div class="p-4 rounded-lg bg-white/5">
                         <h3 class="mb-2 text-lg font-bold">Anggota Tim</h3>
                         <ul class="mb-4 space-y-2">
@@ -107,6 +108,7 @@
                     </div>
                 </div>
 
+                {{-- Bagian File Proyek --}}
                 <div class="pt-6 mt-6 border-t border-white/10">
                     <h3 class="mb-4 text-lg font-bold">File Proyek</h3>
                     <form action="{{ route('projects.files.store', $project) }}" method="POST"
@@ -141,7 +143,7 @@
                                         </form>
                                     @endcan
                                 </div>
-
+                                {{-- Diskusi File --}}
                                 <div class="pt-3 mt-3 border-t border-white/10">
                                     <h4 class="mb-2 text-sm font-semibold">Diskusi File</h4>
                                     <form action="{{ route('files.comments.store', $file) }}" method="POST"
@@ -177,6 +179,7 @@
                 </div>
             </div>
 
+            {{-- KANBAN BOARD & TASK MODAL --}}
             <div x-data="{
                 isModalOpen: false,
                 isEditing: false,
@@ -209,27 +212,56 @@
                                     class="w-full p-4 text-left border rounded-lg shadow-md bg-white/5 border-white/10 hover:bg-white/10"
                                     data-task-id="{{ $task->id }}">
                                     <p class="text-white">{{ $task->title }}</p>
-                                    @if ($task->due_date)
-                                        <div
-                                            class="flex items-center mt-2 text-xs {{ $task->due_date->isPast() ? 'text-red-400' : 'text-gray-400' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
-                                                viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            <span>{{ $task->due_date->format('d M') }}</span>
+                                    {{-- Menampilkan Rentang Tanggal di Card --}}
+                                    @if ($task->start_date || $task->due_date)
+                                        <div class="mt-2 space-y-1">
+                                            @if ($task->start_date)
+                                                <div class="flex items-center text-xs text-indigo-300">
+                                                    <span class="mr-1">Mulai:</span>
+                                                    <span>{{ $task->start_date->format('d M') }}</span>
+                                                </div>
+                                            @endif
+                                            @if ($task->due_date)
+                                                <div
+                                                    class="flex items-center text-xs {{ $task->due_date->isPast() ? 'text-red-400' : 'text-gray-400' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                        viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd"
+                                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span>{{ $task->due_date->format('d M') }}</span>
+                                                </div>
+                                            @endif
                                         </div>
                                     @endif
                                 </button>
                             @endforeach
                         </div>
+                        {{-- Form Tambah Tugas (Updated) --}}
                         <div class="mt-4">
-                            <form method="POST" action="{{ route('tasks.store') }}">
+                            <form method="POST" action="{{ route('tasks.store') }}" class="space-y-2">
                                 @csrf
                                 <input type="hidden" name="project_id" value="{{ $project->id }}">
                                 <x-text-input class="block w-full text-sm" type="text" name="title"
-                                    placeholder="+ Tambah tugas baru" required />
+                                    placeholder="Judul tugas..." required />
+
+                                {{-- Input Tanggal Start & End Ringkas --}}
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="relative">
+                                        <label class="text-[10px] text-gray-400 block mb-1">Mulai</label>
+                                        <x-text-input class="block w-full px-2 py-1 text-xs" type="date"
+                                            name="start_date" />
+                                    </div>
+                                    <div class="relative">
+                                        <label class="text-[10px] text-gray-400 block mb-1">Selesai</label>
+                                        <x-text-input class="block w-full px-2 py-1 text-xs" type="date"
+                                            name="due_date" />
+                                    </div>
+                                </div>
+
+                                <x-primary-button class="justify-center w-full py-2 mt-2 text-xs">+
+                                    Tambah</x-primary-button>
                             </form>
                         </div>
                     </div>
@@ -244,16 +276,26 @@
                                     class="w-full p-4 text-left border rounded-lg shadow-md bg-white/5 border-white/10 hover:bg-white/10"
                                     data-task-id="{{ $task->id }}">
                                     <p class="text-white">{{ $task->title }}</p>
-                                    @if ($task->due_date)
-                                        <div
-                                            class="flex items-center mt-2 text-xs {{ $task->due_date->isPast() ? 'text-red-400' : 'text-gray-400' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
-                                                viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            <span>{{ $task->due_date->format('d M') }}</span>
+                                    @if ($task->start_date || $task->due_date)
+                                        <div class="mt-2 space-y-1">
+                                            @if ($task->start_date)
+                                                <div class="flex items-center text-xs text-indigo-300">
+                                                    <span class="mr-1">Mulai:</span>
+                                                    <span>{{ $task->start_date->format('d M') }}</span>
+                                                </div>
+                                            @endif
+                                            @if ($task->due_date)
+                                                <div
+                                                    class="flex items-center text-xs {{ $task->due_date->isPast() ? 'text-red-400' : 'text-gray-400' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                        viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd"
+                                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span>{{ $task->due_date->format('d M') }}</span>
+                                                </div>
+                                            @endif
                                         </div>
                                     @endif
                                 </button>
@@ -271,15 +313,25 @@
                                     class="w-full p-4 text-left border rounded-lg shadow-md bg-white/5 border-white/10 hover:bg-white/10"
                                     data-task-id="{{ $task->id }}">
                                     <p class="text-gray-400 line-through">{{ $task->title }}</p>
-                                    @if ($task->due_date)
-                                        <div class="flex items-center mt-2 text-xs text-gray-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
-                                                viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                            <span>{{ $task->due_date->format('d M') }}</span>
+                                    @if ($task->start_date || $task->due_date)
+                                        <div class="mt-2 space-y-1">
+                                            @if ($task->start_date)
+                                                <div class="flex items-center text-xs text-gray-500">
+                                                    <span class="mr-1">Mulai:</span>
+                                                    <span>{{ $task->start_date->format('d M') }}</span>
+                                                </div>
+                                            @endif
+                                            @if ($task->due_date)
+                                                <div class="flex items-center text-xs text-gray-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1"
+                                                        viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd"
+                                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span>{{ $task->due_date->format('d M') }}</span>
+                                                </div>
+                                            @endif
                                         </div>
                                     @endif
                                 </button>
@@ -288,7 +340,7 @@
                     </div>
                 </div>
 
-                {{-- Modal Task --}}
+                {{-- MODAL DETAIL & EDIT TASK --}}
                 <div x-show="isModalOpen" class="fixed inset-0 z-40 bg-black bg-opacity-50"
                     @click="isModalOpen = false" x-cloak></div>
                 <div x-show="isModalOpen" x-transition class="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -297,6 +349,7 @@
                         class="glass-panel w-full max-w-2xl max-h-[90vh] flex flex-col sm:rounded-lg">
                         <template x-if="selectedTask">
                             <div>
+                                {{-- MODE VIEW --}}
                                 <div x-show="!isEditing">
                                     <div class="flex items-center justify-between p-4 border-b border-white/10">
                                         <h2 class="text-xl font-bold text-white" x-text="selectedTask.title"></h2>
@@ -308,21 +361,37 @@
                                     <div class="p-6 overflow-y-auto">
                                         <p class="mb-6 text-gray-300"
                                             x-text="selectedTask.description || 'Tidak ada deskripsi.'"></p>
-                                        <template x-if="selectedTask.due_date">
-                                            <div class="mb-4">
-                                                <span class="text-sm font-semibold text-gray-300">Tenggat Waktu:</span>
-                                                <span class="text-sm font-bold"
-                                                    :class="{
-                                                        'text-red-400': new Date(selectedTask.due_date) < new Date() &&
-                                                            selectedTask.status !== 'Done',
-                                                        'text-yellow-500': new Date(selectedTask.due_date) >=
-                                                            new Date() && selectedTask.status !== 'Done',
-                                                        'text-green-400': selectedTask.status === 'Done'
-                                                    }"
-                                                    x-text="new Date(selectedTask.due_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })">
-                                                </span>
-                                            </div>
-                                        </template>
+
+                                        {{-- Info Tanggal di Modal --}}
+                                        <div class="grid grid-cols-2 gap-4 mb-6">
+                                            <template x-if="selectedTask.start_date">
+                                                <div>
+                                                    <span class="text-sm font-semibold text-gray-300">Tanggal
+                                                        Mulai:</span>
+                                                    <div class="text-sm font-bold text-white"
+                                                        x-text="new Date(selectedTask.start_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })">
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <template x-if="selectedTask.due_date">
+                                                <div>
+                                                    <span class="text-sm font-semibold text-gray-300">Tenggat
+                                                        Waktu:</span>
+                                                    <div class="text-sm font-bold"
+                                                        :class="{
+                                                            'text-red-400': new Date(selectedTask.due_date) <
+                                                                new Date() &&
+                                                                selectedTask.status !== 'Done',
+                                                            'text-yellow-500': new Date(selectedTask.due_date) >=
+                                                                new Date() && selectedTask.status !== 'Done',
+                                                            'text-green-400': selectedTask.status === 'Done'
+                                                        }"
+                                                        x-text="new Date(selectedTask.due_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })">
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+
                                         <h4 class="mb-2 text-sm font-semibold text-white">Diskusi Tugas</h4>
                                         <form method="POST" :action="'/tasks/' + selectedTask.id + '/comments'">
                                             @csrf
@@ -345,6 +414,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {{-- MODE EDIT --}}
                                 <div x-show="isEditing">
                                     <form method="POST" :action="'/tasks/' + selectedTask.id">
                                         @csrf
@@ -357,12 +428,26 @@
                                             <textarea name="description" x-model="selectedTask.description"
                                                 class="w-full text-gray-200 border-gray-500 rounded-md shadow-sm bg-white/5" rows="4"
                                                 placeholder="Tambahkan deskripsi..."></textarea>
-                                            <div class="mt-4">
-                                                <x-input-label for="task_due_date" :value="__('Tenggat Waktu')"
-                                                    class="text-white" />
-                                                <x-text-input id="task_due_date" type="date" name="due_date"
-                                                    class="block w-full mt-1" ::value="selectedTask.due_date ? selectedTask.due_date.substring(0, 10) : ''" />
+
+                                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                                <div>
+                                                    <x-input-label for="task_start_date" :value="__('Tanggal Mulai')"
+                                                        class="text-white" />
+                                                    {{-- Binding value untuk date input (substring untuk ambil YYYY-MM-DD) --}}
+                                                    <x-text-input id="task_start_date" type="date"
+                                                        name="start_date" class="block w-full mt-1"
+                                                        ::value="selectedTask.start_date ? selectedTask.start_date.substring(0,
+                                                            10) : ''" />
+                                                </div>
+                                                <div>
+                                                    <x-input-label for="task_due_date" :value="__('Tenggat Waktu')"
+                                                        class="text-white" />
+                                                    <x-text-input id="task_due_date" type="date" name="due_date"
+                                                        class="block w-full mt-1" ::value="selectedTask.due_date ? selectedTask.due_date.substring(0, 10) :
+                                                            ''" />
+                                                </div>
                                             </div>
+
                                             <div class="flex justify-end gap-2 mt-4">
                                                 <button type="button" @click="isEditing = false"
                                                     class="px-4 py-2 text-sm text-gray-300 rounded-lg hover:bg-white/10">Batal</button>
@@ -371,6 +456,7 @@
                                         </div>
                                     </form>
                                 </div>
+
                                 <div
                                     class="flex items-center justify-between p-4 border-t bg-black/20 border-white/10">
                                     <div>

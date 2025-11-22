@@ -22,6 +22,7 @@ class Task extends Model
         'status',
         'project_id',
         'user_id',
+        'start_date',
         'due_date',
     ];
 
@@ -31,6 +32,7 @@ class Task extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'start_date' => 'date',
         'due_date' => 'date', // <-- TAMBAHKAN BLOK INI
     ];
 

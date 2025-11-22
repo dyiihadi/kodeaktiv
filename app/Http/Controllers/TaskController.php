@@ -2,86 +2,74 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Project;
 use App\Models\Task;
-use Illuminate\Validation\Rule;
+use App\Models\Project; // Pastikan model Project di-import
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
     /**
-     * Menyimpan tugas baru ke database.
+     * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
             'project_id' => 'required|exists:projects,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            // Validasi: Tenggat waktu harus setelah tanggal mulai
+            'due_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        $project = Project::findOrFail($validated['project_id']);
+        // Pastikan user memiliki akses ke project ini sebelum membuat task
+        $project = Project::findOrFail($request->project_id);
 
-        // Otorisasi: Pastikan user yang login boleh menambah tugas ke proyek ini
-        $this->authorize('update', $project);
+        // Cek otorisasi (User harus pemilik atau anggota)
+        if ($project->user_id !== Auth::id() && !$project->members->contains(Auth::id())) {
+            abort(403, 'Unauthorized action.');
+        }
 
-        // Buat tugas yang sudah terelasi dengan proyek
-        $project->tasks()->create([
-            'title' => $validated['title'],
-        ]);
+        // Set status default
+        $validated['status'] = 'To Do';
 
-        // --- INI BAGIAN PERBAIKANNYA ---
+        Task::create($validated);
 
-        // Alih-alih hanya `return back()`, kita redirect kembali ke halaman `show`
-        // Ini akan memaksa ProjectController@show untuk berjalan lagi dan mengambil
-        // semua data tugas yang sudah diperbarui, termasuk tugas yang baru dibuat.
-        return redirect()->route('projects.show', $project)
-            ->with('status', 'Tugas baru berhasil ditambahkan.');
-    }
-    public function updateStatus(Request $request, Task $task)
-    {
-        $validated = $request->validate([
-            'status' => ['required', Rule::in(['To Do', 'In Progress', 'Done'])],
-        ]);
-
-        // Lakukan otorisasi di sini jika perlu (misal: pastikan user adalah anggota proyek)
-
-        $task->update(['status' => $validated['status']]);
-
-        return response()->json(['message' => 'Status tugas berhasil diperbarui.']);
+        return back()->with('status', 'Tugas berhasil ditambahkan!');
     }
 
     /**
-     * Memperbarui tugas yang ada.
+     * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(Request $request, Task $task): RedirectResponse
     {
-        // 1. Otorisasi
-        $this->authorize('update', $task);
+        // Otorisasi via Policy (pastikan TaskPolicy sudah ada atau cek manual)
+        $this->authorize('update', $task->project);
 
-        // 2. Validasi
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
-            'due_date' => 'nullable|date',
+            'status' => 'sometimes|required|in:To Do,In Progress,Done',
+            'start_date' => 'nullable|date',
+            'due_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        // 3. Update data
         $task->update($validated);
 
         return back()->with('status', 'Tugas berhasil diperbarui!');
     }
 
     /**
-     * Menghapus tugas.
+     * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(Task $task): RedirectResponse
     {
-        // 1. Otorisasi
-        $this->authorize('delete', $task);
+        $this->authorize('delete', $task->project);
 
-        // 2. Hapus data
         $task->delete();
 
-        return back()->with('status', 'Tugas berhasil dihapus.');
+        return back()->with('status', 'Tugas berhasil dihapus!');
     }
 }
